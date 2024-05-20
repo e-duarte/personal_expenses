@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:personal_expenses/app/components/option_button.dart';
 
-class ChartOptions extends StatelessWidget {
-  const ChartOptions({
+class ChartSelector extends StatelessWidget {
+  const ChartSelector({
     super.key,
     required this.initialOption,
     required this.optionHandle,
@@ -13,22 +13,23 @@ class ChartOptions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final options = ['Geral', 'Marcadores'];
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         OptionButton(
-          label: 'Geral',
-          color: _getColor(context, 'Geral'),
-          textColor: _getTextColor(context, 'Geral'),
+          label: options[0],
+          color: _getColor(context, options[0]),
+          textColor: _getTextColor(context, options[0]),
           onTap: _optionChanged,
         ),
         SizedBox(
           width: MediaQuery.of(context).size.width * 0.03,
         ),
         OptionButton(
-          label: 'Mês',
-          color: _getColor(context, 'Mês'),
-          textColor: _getTextColor(context, 'Mês'),
+          label: options[1],
+          color: _getColor(context, options[1]),
+          textColor: _getTextColor(context, options[1]),
           onTap: _optionChanged,
         ),
       ],

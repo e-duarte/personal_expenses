@@ -18,7 +18,7 @@ class OptionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     return SizedBox(
-      width: mediaQuery.size.width * 0.33,
+      width: mediaQuery.size.width * 0.41,
       height: mediaQuery.size.height * 0.03,
       child: ElevatedButton(
         onPressed: () => onTap(label),
