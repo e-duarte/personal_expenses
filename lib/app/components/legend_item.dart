@@ -14,7 +14,7 @@ class LegendItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final iconHeigth = MediaQuery.of(context).size.height * 0.037;
     final iconWidth = MediaQuery.of(context).size.width * 0.037;
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height * 0.04,
       width: MediaQuery.of(context).size.height * 0.1,
       // color: Colors.amber,

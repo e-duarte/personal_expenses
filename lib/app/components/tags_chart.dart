@@ -10,12 +10,10 @@ class TagsChart extends StatelessWidget {
     super.key,
     required this.tags,
     required this.transactions,
-    required this.barColors,
   });
 
   final List<Tag> tags;
   final List<Transaction> transactions;
-  final List<int> barColors;
 
   @override
   Widget build(BuildContext context) {
@@ -54,12 +52,14 @@ class TagsChart extends StatelessWidget {
                   ),
                 ),
                 barGroups: List.generate(_groupedValues.length, (index) {
+                  final tagColor = Color(int.parse(tags[index].color));
+
                   return BarChartGroupData(
                     x: index,
                     barRods: [
                       BarChartRodData(
                         toY: _groupedValues[index]['value'] as double,
-                        color: Color(barColors[index]),
+                        color: tagColor,
                       )
                     ],
                   );
@@ -124,7 +124,9 @@ class TagsChart extends StatelessWidget {
     return tags.map((tag) {
       var totalSum = 0.0;
       for (var tr in transactions) {
-        if (tr.tag.tag == tag.tag) totalSum += tr.value;
+        if (tr.tag.tag == tag.tag) {
+          totalSum += (tr.owner == Owner.divided) ? tr.value / 2 : tr.value;
+        }
       }
 
       return {'tag': tag.tag, 'value': totalSum};

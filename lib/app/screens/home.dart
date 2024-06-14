@@ -1,120 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:personal_expenses/app/components/chart_selector.dart';
 import 'package:personal_expenses/app/components/consume_chart.dart';
 import 'package:personal_expenses/app/components/months_dropdown.dart';
+import 'package:personal_expenses/app/components/setting_form.dart';
 import 'package:personal_expenses/app/components/tags_chart.dart';
+import 'package:personal_expenses/app/components/transaction_form.dart';
+import 'package:personal_expenses/app/components/transaction_list.dart';
+import 'package:personal_expenses/app/models/settings.dart';
 import 'package:personal_expenses/app/models/tag.dart';
 import 'package:personal_expenses/app/models/transaction.dart';
+import 'package:personal_expenses/app/services/settings_service.dart';
+import 'package:personal_expenses/app/services/tag_service.dart';
+import 'package:personal_expenses/app/services/transaction_service.dart';
 
 class _HomeState extends State<Home> {
-  String? _selectedMonth;
+  DateTime? _selectedMonth;
   String _selectedOption = 'Geral';
-  double? _monthValue;
-  final _tagColors = [
-    0xFFF4DBB4,
-    0xFFB4C4ED,
-    0xFFB4EDBD,
-    0xFFE8B4ED,
-  ];
-  final _tags = [
-    Tag(
-      tag: 'cats',
-      iconPath: 'assets/icons/cats_icon.png',
-    ),
-    Tag(
-      tag: 'compras',
-      iconPath: 'assets/icons/compras_icon.png',
-    ),
-    Tag(
-      tag: 'mercado',
-      iconPath: 'assets/icons/mercado_icon.png',
-    ),
-    Tag(
-      tag: 'merenda',
-      iconPath: 'assets/icons/merenda_icon.png',
-    ),
-  ];
+  // double? _monthValue;
+  Settings? _settings;
 
-  final _transactions = [
-    Transaction(
-      title: 'Ração de 10k Wiskas',
-      value: 220,
-      date: DateTime(2024, 1, 1),
-      fixed: false,
-      tag: Tag(
-        tag: 'cats',
-        iconPath: 'assets/icons/cats_icon.png',
-      ),
-      installments: 1,
-      others: '',
-      payment: 'credit',
-    ),
-    Transaction(
-      title: 'Ração wiskas',
-      value: 19.99,
-      date: DateTime.now(),
-      fixed: false,
-      tag: Tag(
-        tag: 'cats',
-        iconPath: 'assets/icons/cats_icon.png',
-      ),
-      installments: 1,
-      others: '',
-      payment: 'credit',
-    ),
-    Transaction(
-      title: 'Tenis adidas',
-      value: 419,
-      date: DateTime.now(),
-      fixed: false,
-      tag: Tag(
-        tag: 'compras',
-        iconPath: 'assets/icons/compras_icon.png',
-      ),
-      installments: 4,
-      others: '',
-      payment: 'credit',
-    ),
-    Transaction(
-      title: 'Shampoo e Condicionador',
-      value: 45.7,
-      date: DateTime.now(),
-      fixed: false,
-      tag: Tag(
-        tag: 'mercado',
-        iconPath: 'assets/icons/mercado_icon.png',
-      ),
-      installments: 1,
-      others: 'vitor',
-      payment: 'credit',
-    ),
-    Transaction(
-      title: '1 coxinha e refri',
-      value: 45.7,
-      date: DateTime.now(),
-      fixed: false,
-      tag: Tag(
-        tag: 'merenda',
-        iconPath: 'assets/icons/merenda_icon.png',
-      ),
-      installments: 1,
-      others: '',
-      payment: 'credit',
-    ),
-  ];
+  List<Tag> _tags = [];
+
+  List<Transaction>? _transactions;
 
   @override
   void initState() {
     super.initState();
+    _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
 
-    _selectedMonth = toBeginningOfSentenceCase(
-        DateFormat.MMMM('pt_BR').format(DateTime.now()));
+    SettingsService().getSettings().then((settings) {
+      setState(() {
+        _settings = settings;
+      });
+    });
+
+    TagService().getTags().then((value) {
+      setState(() {
+        _tags = value;
+      });
+    });
+
+    TransactionService().getTransactions().then((trs) {
+      setState(() {
+        _transactions = trs;
+      });
+    });
+
+    // _monthValue = 3807.18;
   }
 
   @override
   Widget build(BuildContext context) {
-    _monthValue = 3807.18;
+    return _settings == null
+        ? _loadingScreen()
+        : _tags.isNotEmpty
+            ? _transactions != null
+                ? _buildHome()
+                : _loadingScreen()
+            : _loadingScreen();
+  }
+
+  Widget _buildHome() {
     final mediaQuery = MediaQuery.of(context);
 
     final appBarHeight = mediaQuery.size.height * 0.05;
@@ -122,12 +68,23 @@ class _HomeState extends State<Home> {
       preferredSize: Size.fromHeight(appBarHeight),
       child: AppBar(
         title: MonthsDropDown(
-          initialMonth: _selectedMonth,
-          onChanged: _changeMonth,
+          month: _selectedMonth!,
+          onChanged: (newMonth) {
+            setState(() {
+              _selectedMonth = newMonth;
+            });
+          },
         ),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.add)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+          IconButton(
+            onPressed: _openTransactionalModal,
+            icon: const Icon(Icons.add),
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          IconButton(
+            onPressed: _openSettingsModal,
+            icon: const Icon(Icons.settings),
+          ),
         ],
       ),
     );
@@ -144,7 +101,11 @@ class _HomeState extends State<Home> {
             height: availableHeight * 0.04,
             child: ChartSelector(
               initialOption: _selectedOption,
-              optionHandle: _changeChart,
+              optionHandle: (String option) {
+                setState(() {
+                  _selectedOption = option;
+                });
+              },
             ),
           ),
           SizedBox(
@@ -163,14 +124,13 @@ class _HomeState extends State<Home> {
                     ),
                     child: _selectedOption == 'Geral'
                         ? ConsumeChart(
-                            value: _monthValue!,
+                            value: _settings!.monthValue,
                             transactions: _getTransactionByMonth,
                           )
                         : Center(
                             child: TagsChart(
                               transactions: _getTransactionByMonth,
                               tags: _tags,
-                              barColors: _tagColors,
                             ),
                           ),
                   ),
@@ -183,33 +143,103 @@ class _HomeState extends State<Home> {
             padding: const EdgeInsets.all(15),
             width: double.infinity,
             decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(40))),
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+            ),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Transações',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    )
+                  ],
+                ),
+                Expanded(
+                  child: TransactionList(
+                    currentDate: _selectedMonth!,
+                    transactions: _getTransactionByMonth,
+                    onRemoveTransaction: _removeTransaction,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
+  Widget _loadingScreen() {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  void _openTransactionalModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return TransactionForm(
+          onSubmit: _addNewTransaction,
+        );
+      },
+    );
+  }
+
+  void _openSettingsModal() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) {
+        return SizedBox(
+          child: SettingsForm(
+            settings: _settings!,
+            onSettingChanged: _updateSettings,
+          ),
+        );
+      },
+    );
+  }
+
+  void _updateSettings(Settings settings) async {
+    const id = 1;
+    final newSettings = await SettingsService().update(id, settings);
+    setState(() {
+      _settings = newSettings;
+    });
+  }
+
+  void _addNewTransaction(Transaction transaction) async {
+    final newTransaction =
+        await TransactionService().insertTransaction(transaction);
+    setState(() {
+      _transactions!.add(newTransaction);
+    });
+  }
+
+  void _removeTransaction(Transaction transaction) async {
+    await TransactionService().removeTransaction(transaction);
+
+    setState(() {
+      _transactions!.removeWhere((tr) => tr.id == transaction.id);
+    });
+  }
+
   List<Transaction> get _getTransactionByMonth {
-    return _transactions.where((tr) {
-      final transactionMonth = toBeginningOfSentenceCase(
-        DateFormat.MMMM('pt_BR').format(tr.date),
-      );
-      return transactionMonth == _selectedMonth;
+    return _transactions!.where((tr) {
+      return (tr.date.isBefore(_selectedMonth!) ||
+              tr.date.month == _selectedMonth!.month ||
+              tr.fixed) &&
+          tr.date.year == _selectedMonth!.year;
+    }).where((tr) {
+      final trMonth = tr.date.month;
+      final currentMonth = _selectedMonth!.month;
+
+      return ((trMonth + tr.installments) > currentMonth) || tr.fixed;
     }).toList();
-  }
-
-  void _changeMonth(String month) {
-    setState(() {
-      _selectedMonth = month;
-    });
-  }
-
-  void _changeChart(String option) {
-    setState(() {
-      _selectedOption = option;
-    });
   }
 }
 

@@ -32,3 +32,10 @@ flutter:
     - assets/icons/compras_icon.png
     - assets/icons/mercado_icon.png
     - assets/icons/merenda_icon.png
+    - assets/icons/meal_icon.png
+    - assets/icons/home_icon.png
+    - assets/icons/general_icon.png
+    - assets/icons/reserva_icon.png
+    - assets/icons/divided_icon.png
+    - assets/icons/users_icon.png
+    - assets/icons/pin_icon.png

@@ -1,64 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:personal_expenses/app/utils/utils.dart';
 
-class _MonthsDropDownState extends State<MonthsDropDown> {
-  String? monthValue;
+class MonthsDropDown extends StatelessWidget {
+  const MonthsDropDown({
+    super.key,
+    required this.month,
+    required this.onChanged,
+  });
 
-  @override
-  void initState() {
-    super.initState();
-
-    monthValue = widget.initialMonth;
-  }
+  final DateTime month;
+  final void Function(DateTime) onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      value: monthValue,
+    return DropdownButton<DateTime>(
       icon: const Icon(
         Icons.keyboard_arrow_down,
         size: 30,
       ),
       underline: Container(),
-      style: Theme.of(context).textTheme.titleLarge,
+      style: Theme.of(context).textTheme.titleMedium,
       onChanged: (value) {
-        setState(() {
-          monthValue = value;
-          widget.onChanged(value!);
-        });
+        onChanged(value!);
       },
-      items: _months.map((month) {
+      items: _months.map((m) {
         return DropdownMenuItem(
-          value: month,
+          value: m,
           child: Text(
-            month,
+            toBeginningOfSentenceCase(formatMonthToBr(m))!,
           ),
         );
       }).toList(),
+      value: month,
     );
   }
 
-  List<String> get _months {
-    return List.generate(12, (i) => i + 1)
-        .map((i) {
-          final date = DateTime(DateTime.now().year, i);
-          return DateFormat.MMMM('pt_BR').format(date);
-        })
-        .map((month) => toBeginningOfSentenceCase(month)!)
-        .toList();
+  List<DateTime> get _months {
+    return List.generate(12, (i) => i + 1).map((i) {
+      return DateTime(DateTime.now().year, i);
+    }).toList();
   }
-}
-
-class MonthsDropDown extends StatefulWidget {
-  const MonthsDropDown({
-    super.key,
-    required this.initialMonth,
-    required this.onChanged,
-  });
-
-  final String? initialMonth;
-  final void Function(String) onChanged;
-
-  @override
-  State<MonthsDropDown> createState() => _MonthsDropDownState();
 }

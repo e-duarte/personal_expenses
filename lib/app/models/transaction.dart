@@ -1,6 +1,10 @@
 import 'package:intl/intl.dart';
 import 'package:personal_expenses/app/models/tag.dart';
 
+enum Owner { me, divided, other }
+
+enum Payment { pix, pixCredit, credit }
+
 class Transaction {
   final int? id;
   final String title;
@@ -9,8 +13,9 @@ class Transaction {
   final bool fixed;
   final Tag tag;
   final int installments;
-  final String others;
-  final String payment;
+  final Owner owner;
+  final String ownerDesc;
+  final Payment payment;
 
   Transaction({
     this.id,
@@ -20,11 +25,25 @@ class Transaction {
     required this.fixed,
     required this.tag,
     required this.installments,
-    required this.others,
+    required this.owner,
+    required this.ownerDesc,
     required this.payment,
   });
 
   factory Transaction.fromMap(Map<String, Object?> data) {
+    final owner = switch (data['owner']) {
+      0 => Owner.me,
+      1 => Owner.divided,
+      2 => Owner.other,
+      _ => throw const FormatException('Invalid')
+    };
+
+    final payment = switch (data['payment']) {
+      0 => Payment.pix,
+      1 => Payment.pixCredit,
+      2 => Payment.credit,
+      _ => throw const FormatException('Invalid')
+    };
     return Transaction(
       id: data['id'] as int,
       title: data['title'] as String,
@@ -33,8 +52,9 @@ class Transaction {
       fixed: data['fixed'] == 1,
       tag: Tag.fromMap(data['tag'] as Map<String, Object?>),
       installments: data['installments'] as int,
-      others: data['others'] as String,
-      payment: data['payment'] as String,
+      owner: owner,
+      ownerDesc: data['ownerDesc'] as String,
+      payment: payment,
     );
   }
 
@@ -45,11 +65,38 @@ class Transaction {
       'value': value,
       'date': DateFormat('dd/MM/yyyy').format(date),
       'fixed': fixed ? 1 : 0,
-      'tag': tag.toMap(),
+      'tag': tag.id,
       'installments': installments,
-      'others': others,
-      'payment': payment,
+      'owner': owner.index,
+      'ownerDesc': ownerDesc,
+      'payment': payment.index,
     };
+  }
+
+  Transaction copyWith({
+    int? id,
+    String? title,
+    double? value,
+    DateTime? date,
+    bool? fixed,
+    Tag? tag,
+    int? installments,
+    Owner? owner,
+    String? ownerDesc,
+    Payment? payment,
+  }) {
+    return Transaction(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      value: value ?? this.value,
+      date: date ?? this.date,
+      fixed: fixed ?? this.fixed,
+      tag: tag ?? this.tag,
+      installments: installments ?? this.installments,
+      owner: owner ?? this.owner,
+      ownerDesc: ownerDesc ?? this.ownerDesc,
+      payment: payment ?? this.payment,
+    );
   }
 
   @override

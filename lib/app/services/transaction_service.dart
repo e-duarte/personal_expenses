@@ -5,16 +5,9 @@ import 'package:personal_expenses/app/utils/db_utils.dart';
 class TransactionService {
   static const _table = 'transactions';
 
-  Future<void> insertTransaction(Transaction transaction) async {
-    final tagMap = transaction.tag.toMap();
-    tagMap.removeWhere((key, value) => key == 'id');
-    final tagId = await DbUtils.insertData('tags', tagMap);
-
-    final transactionMap = transaction.toMap();
-    transactionMap.removeWhere((key, value) => key == 'id');
-    transactionMap['tag'] = tagId;
-
-    await DbUtils.insertData(_table, transactionMap);
+  Future<Transaction> insertTransaction(Transaction transaction) async {
+    final transactionId = await DbUtils.insertData(_table, transaction.toMap());
+    return transaction.copyWith(id: transactionId);
   }
 
   Future<List<Transaction>> getTransactions() async {
@@ -22,11 +15,15 @@ class TransactionService {
     final List<Transaction> transactions = [];
 
     for (var tr in transactionsMaps) {
-      final tag = await TagService().getTag(tr['id'] as int);
+      final tag = await TagService().getTag(tr['tag'] as int);
       final Map<String, Object?> newMap = Map.from(tr);
       newMap['tag'] = tag.toMap();
       transactions.add(Transaction.fromMap(newMap));
     }
     return transactions;
+  }
+
+  Future<void> removeTransaction(Transaction transaction) async {
+    await DbUtils.deleteData(_table, transaction.toMap());
   }
 }

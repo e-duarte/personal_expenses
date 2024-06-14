@@ -14,8 +14,9 @@ class DbUtils {
         fixed INTEGER NOT NULL,
         tag INTEGER NOT NULL,
         installments INTEGER NOT NULL,
-        others TEXT NOT NULL,
-        payment TEXT NOT NULL,
+        owner INTEGER NOT NULL,
+        ownerDesc TEXT NOT NULL,
+        payment INTEGER NOT NULL,
         FOREIGN KEY (tag)
           REFERENCES tags (id)
             ON DELETE CASCADE 
@@ -24,7 +25,13 @@ class DbUtils {
   static const _tagTable = '''CREATE TABLE tags(
         id INTEGER PRIMARY KEY,
         tag TEXT NOT NULL,
-        iconPath TEXT NOT NULL
+        iconPath TEXT NOT NULL,
+        color TEXT NOT NULL
+      )''';
+
+  static const _settingTable = '''CREATE TABLE settings(
+        id INTEGER PRIMARY KEY,
+        monthValue REAL NOT NULL
       )''';
 
   static Future<sql.Database> database() async {
@@ -35,6 +42,7 @@ class DbUtils {
       onCreate: (db, version) {
         db.execute(_transactionTable);
         db.execute(_tagTable);
+        db.execute(_settingTable);
       },
       version: 1,
     );
@@ -63,7 +71,6 @@ class DbUtils {
 
     final maps = await db.query(
       table,
-      columns: ['id', 'tag'],
       where: 'id = ?',
       whereArgs: [id],
     );
@@ -73,5 +80,22 @@ class DbUtils {
     }
 
     return {};
+  }
+
+  static Future<int> updateData(String table, Map<String, Object?> data) async {
+    final db = await DbUtils.database();
+    return await db.update(
+      table,
+      data,
+      where: 'id = ?',
+      whereArgs: [data['id']],
+    );
+  }
+
+  static Future<void> deleteData(
+      String table, Map<String, Object?> data) async {
+    final db = await DbUtils.database();
+
+    await db.delete(table, where: 'id = ?', whereArgs: [data['id']]);
   }
 }

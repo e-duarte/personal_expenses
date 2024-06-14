@@ -23,12 +23,35 @@ class App extends StatelessWidget {
       theme: theme.copyWith(
         colorScheme: theme.colorScheme.copyWith(
           primary: const Color(0xFF2D9E64),
-          secondary: const Color(0xFFF15223),
+          secondary: Colors.redAccent,
         ),
         textTheme: theme.textTheme.copyWith(
           titleLarge: const TextStyle(
+            fontSize: 23,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+          titleMedium: const TextStyle(
             fontSize: 22,
             color: Colors.black,
+          ),
+          labelLarge: const TextStyle(
+            fontSize: 18,
+            color: Colors.black,
+            fontWeight: FontWeight.w400,
+          ),
+          labelMedium: const TextStyle(
+            fontSize: 17,
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+          labelSmall: const TextStyle(
+            fontSize: 17,
+            color: Color(0xFF656066),
+            // fontWeight: FontWeight.bold,
+          ),
+          titleSmall: const TextStyle(
+            color: Color(0xFF656066),
           ),
         ),
         appBarTheme: theme.appBarTheme.copyWith(

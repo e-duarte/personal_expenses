@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:personal_expenses/app/components/legend_item.dart';
 import 'package:personal_expenses/app/components/portion_icon.dart';

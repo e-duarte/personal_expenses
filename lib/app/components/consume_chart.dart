@@ -17,7 +17,7 @@ class ConsumeChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final consumePercent = _totalSum / value;
+    final consumePercent = value != 0.0 ? _totalSum / value : 0.0;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -58,8 +58,15 @@ class ConsumeChart extends StatelessWidget {
     );
   }
 
-  double get _totalSum => transactions.fold(0, (sum, tr) => sum + tr.value);
+  double get _totalSum => transactions
+          .where((tr) => tr.owner == Owner.me || tr.owner == Owner.divided)
+          .fold(0, (sum, tr) {
+        return tr.owner == Owner.divided
+            ? (sum + tr.value / 2)
+            : sum + (tr.value / tr.installments);
+      });
+
   double get _otherValues => transactions
-      .where((tr) => tr.others.isNotEmpty)
+      .where((tr) => tr.owner == Owner.other)
       .fold(0, (sum, tr) => sum + tr.value);
 }
