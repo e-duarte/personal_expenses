@@ -4,6 +4,7 @@ import 'package:personal_expenses/app/components/consume_chart.dart';
 import 'package:personal_expenses/app/components/months_dropdown.dart';
 import 'package:personal_expenses/app/components/setting_form.dart';
 import 'package:personal_expenses/app/components/tags_chart.dart';
+import 'package:personal_expenses/app/components/transaction_filter_menu.dart';
 import 'package:personal_expenses/app/components/transaction_form.dart';
 import 'package:personal_expenses/app/components/transaction_list.dart';
 import 'package:personal_expenses/app/models/settings.dart';
@@ -12,16 +13,107 @@ import 'package:personal_expenses/app/models/transaction.dart';
 import 'package:personal_expenses/app/services/settings_service.dart';
 import 'package:personal_expenses/app/services/tag_service.dart';
 import 'package:personal_expenses/app/services/transaction_service.dart';
+import 'package:personal_expenses/app/utils/utils.dart';
 
 class _HomeState extends State<Home> {
   DateTime? _selectedMonth;
   String _selectedOption = 'Geral';
-  // double? _monthValue;
   Settings? _settings;
 
   List<Tag> _tags = [];
 
   List<Transaction>? _transactions;
+
+  Map<String, bool> _filter = {
+    'Dividido': false,
+    'Fixado': false,
+    'Ninos': false,
+    'Compras': false,
+    'Mercado': false,
+    'Merenda': false,
+    'Refeição': false,
+    'Despesas': false,
+    'Reserva': false,
+    'Geral': false,
+    'Terceiros': false,
+  };
+
+  List<Transaction> get _getTransactionByMonth {
+    return _transactions!.where((tr) {
+      return (tr.date.isBefore(_selectedMonth!) ||
+              tr.date.month == _selectedMonth!.month ||
+              tr.fixed) &&
+          tr.date.year == _selectedMonth!.year;
+    }).where((tr) {
+      final trMonth = tr.date.month;
+      final currentMonth = _selectedMonth!.month;
+
+      return ((trMonth + tr.installments) > currentMonth) || tr.fixed;
+    }).toList();
+  }
+
+  List<Transaction> get _getFiltredTransaction {
+    List<Transaction> filtred = [];
+
+    if (_filter['Dividido'] == false &&
+        _filter['Fixado'] == false &&
+        _filter['Ninos'] == false &&
+        _filter['Compras'] == false &&
+        _filter['Mercado'] == false &&
+        _filter['Merenda'] == false &&
+        _filter['Refeição'] == false &&
+        _filter['Despesas'] == false &&
+        _filter['Reserva'] == false &&
+        _filter['Geral'] == false &&
+        _filter['Terceiros'] == false) {
+      return _getTransactionByMonth;
+    }
+
+    for (var tr in _getTransactionByMonth) {
+      if (_filter['Dividido']!) {
+        if (tr.owner == Owner.divided) {
+          if (!filtred.contains(tr)) filtred.add(tr);
+        }
+      }
+
+      if (_filter['Fixado']!) {
+        if (tr.fixed) {
+          if (!filtred.contains(tr)) filtred.add(tr);
+        }
+      }
+
+      for (var tag in [
+        'Ninos',
+        'Compras',
+        'Mercado',
+        'Merenda',
+        'Refeição',
+        'Despesas',
+        'Reserva',
+        'Geral',
+        'Terceiros',
+      ]) {
+        _filtreTransactionByTag(filtred, tr, tag);
+      }
+    }
+
+    return filtred;
+  }
+
+  double get _sumFiltredTransactions {
+    return _getFiltredTransaction.fold(0.0, (t1, t2) {
+      return t1 + (t2.owner == Owner.divided ? t2.value / 2 : t2.value);
+    });
+  }
+
+  void _filtreTransactionByTag(
+      List<Transaction> filtreds, Transaction tr, String tag) {
+    if (_filter[tag]!) {
+      if (tr.tag.tag == tag) {
+        if (!filtreds.contains(tr)) filtreds.add(tr);
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -45,8 +137,6 @@ class _HomeState extends State<Home> {
         _transactions = trs;
       });
     });
-
-    // _monthValue = 3807.18;
   }
 
   @override
@@ -149,17 +239,36 @@ class _HomeState extends State<Home> {
             child: Column(
               children: [
                 Row(
+                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    Expanded(
+                      child: Text(
+                        'Transações',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
                     Text(
-                      'Transações',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    )
+                      'Soma: R\$${formatValue(_sumFiltredTransactions)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    TransactionFilterMenu(
+                      data: _filter,
+                      onFilterChanged: (filter) {
+                        setState(() {
+                          _filter = filter;
+                        });
+                      },
+                    ),
                   ],
                 ),
                 Expanded(
                   child: TransactionList(
                     currentDate: _selectedMonth!,
-                    transactions: _getTransactionByMonth,
+                    transactions: _getFiltredTransaction,
                     onRemoveTransaction: _removeTransaction,
                   ),
                 ),
@@ -226,20 +335,6 @@ class _HomeState extends State<Home> {
     setState(() {
       _transactions!.removeWhere((tr) => tr.id == transaction.id);
     });
-  }
-
-  List<Transaction> get _getTransactionByMonth {
-    return _transactions!.where((tr) {
-      return (tr.date.isBefore(_selectedMonth!) ||
-              tr.date.month == _selectedMonth!.month ||
-              tr.fixed) &&
-          tr.date.year == _selectedMonth!.year;
-    }).where((tr) {
-      final trMonth = tr.date.month;
-      final currentMonth = _selectedMonth!.month;
-
-      return ((trMonth + tr.installments) > currentMonth) || tr.fixed;
-    }).toList();
   }
 }
 

@@ -44,7 +44,7 @@ class TagService {
         color: '0xFFF6989FA',
       ),
       Tag(
-        tag: 'Desepesas',
+        tag: 'Despesas',
         iconPath: 'assets/icons/home_icon.png',
         color: '0xFFF7FF9A',
       ),

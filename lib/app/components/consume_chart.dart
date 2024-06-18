@@ -60,7 +60,7 @@ class ConsumeChart extends StatelessWidget {
 
   double get _totalSum => transactions
           .where((tr) => tr.owner == Owner.me || tr.owner == Owner.divided)
-          .fold(0, (sum, tr) {
+          .fold(0.0, (sum, tr) {
         return tr.owner == Owner.divided
             ? (sum + tr.value / 2)
             : sum + (tr.value / tr.installments);
