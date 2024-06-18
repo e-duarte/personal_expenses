@@ -14,6 +14,7 @@ import 'package:personal_expenses/app/services/settings_service.dart';
 import 'package:personal_expenses/app/services/tag_service.dart';
 import 'package:personal_expenses/app/services/transaction_service.dart';
 import 'package:personal_expenses/app/utils/utils.dart';
+import 'package:social_share/social_share.dart';
 
 class _HomeState extends State<Home> {
   DateTime? _selectedMonth;
@@ -172,6 +173,10 @@ class _HomeState extends State<Home> {
             color: Theme.of(context).colorScheme.primary,
           ),
           IconButton(
+            onPressed: _shareTransaction,
+            icon: const Icon(Icons.share),
+          ),
+          IconButton(
             onPressed: _openSettingsModal,
             icon: const Icon(Icons.settings),
           ),
@@ -311,6 +316,13 @@ class _HomeState extends State<Home> {
         );
       },
     );
+  }
+
+  void _shareTransaction() {
+    String sharedText = _getFiltredTransaction.fold('', (text, tr) {
+      return '$text ${tr.toWhatsapp()}\n\n';
+    });
+    SocialShare.shareWhatsapp(sharedText);
   }
 
   void _updateSettings(Settings settings) async {

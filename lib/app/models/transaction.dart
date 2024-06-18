@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 import 'package:personal_expenses/app/models/tag.dart';
+import 'package:personal_expenses/app/utils/utils.dart';
 
 enum Owner { me, divided, other }
 
@@ -103,6 +104,13 @@ class Transaction {
       payment: payment ?? this.payment,
       pixDest: pixDest ?? this.pixDest,
     );
+  }
+
+  String toWhatsapp() {
+    final formatedDate = DateFormat('dd/MM/yyyy').format(date);
+    final formatedValue =
+        owner == Owner.divided ? formatValue(value / 2) : formatValue(value);
+    return '$title ($formatedDate) \t\t R\$$formatedValue';
   }
 
   @override
