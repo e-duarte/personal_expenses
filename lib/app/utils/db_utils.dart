@@ -17,6 +17,7 @@ class DbUtils {
         owner INTEGER NOT NULL,
         ownerDesc TEXT NOT NULL,
         payment INTEGER NOT NULL,
+        pixDest TEXT NOT NULL,
         FOREIGN KEY (tag)
           REFERENCES tags (id)
             ON DELETE CASCADE 

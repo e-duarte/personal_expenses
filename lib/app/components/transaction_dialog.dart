@@ -96,6 +96,11 @@ class TransactionDialog extends StatelessWidget {
                 Text(transaction.payment.name)
               ],
             ),
+            if (transaction.pixDest.isNotEmpty)
+              Text(
+                'Enviado para ${transaction.pixDest}',
+                maxLines: 3,
+              ),
           ],
         ),
       ),

@@ -12,6 +12,7 @@ class _TransactionFormState extends State<TransactionForm> {
   final _titleController = TextEditingController();
   final _valueController = TextEditingController();
   final _otherController = TextEditingController();
+  final _pixDestController = TextEditingController();
   final _numberOfInstallments = 10;
 
   Payment _payment = Payment.pix;
@@ -92,6 +93,14 @@ class _TransactionFormState extends State<TransactionForm> {
                 });
               },
             ),
+            if (_payment == Payment.pix || _payment == Payment.pixCredit)
+              TextField(
+                controller: _pixDestController,
+                decoration: const InputDecoration(
+                  labelText: 'Enviado para',
+                ),
+                onSubmitted: (_) => _submitForm(),
+              ),
             if (_payment == Payment.credit)
               InstallmetsDropdown(
                 transactionValue: double.tryParse(_valueController.text) ?? 0.0,
@@ -181,6 +190,7 @@ class _TransactionFormState extends State<TransactionForm> {
   void _submitForm() {
     final title = _titleController.text;
     final value = double.tryParse(_valueController.text) ?? 0.0;
+    final pixDest = _pixDestController.text;
 
     _ownerDesc = switch (_owner) {
       Owner.me => _owner.name,
@@ -205,6 +215,7 @@ class _TransactionFormState extends State<TransactionForm> {
         owner: _owner,
         ownerDesc: _ownerDesc,
         payment: _payment,
+        pixDest: pixDest,
       ),
     );
 

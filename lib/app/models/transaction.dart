@@ -16,6 +16,7 @@ class Transaction {
   final Owner owner;
   final String ownerDesc;
   final Payment payment;
+  final String pixDest;
 
   Transaction({
     this.id,
@@ -28,6 +29,7 @@ class Transaction {
     required this.owner,
     required this.ownerDesc,
     required this.payment,
+    required this.pixDest,
   });
 
   factory Transaction.fromMap(Map<String, Object?> data) {
@@ -55,6 +57,7 @@ class Transaction {
       owner: owner,
       ownerDesc: data['ownerDesc'] as String,
       payment: payment,
+      pixDest: data['pixDest'] as String,
     );
   }
 
@@ -70,6 +73,7 @@ class Transaction {
       'owner': owner.index,
       'ownerDesc': ownerDesc,
       'payment': payment.index,
+      'pixDest': pixDest,
     };
   }
 
@@ -84,6 +88,7 @@ class Transaction {
     Owner? owner,
     String? ownerDesc,
     Payment? payment,
+    String? pixDest,
   }) {
     return Transaction(
       id: id ?? this.id,
@@ -96,6 +101,7 @@ class Transaction {
       owner: owner ?? this.owner,
       ownerDesc: ownerDesc ?? this.ownerDesc,
       payment: payment ?? this.payment,
+      pixDest: pixDest ?? this.pixDest,
     );
   }
 
