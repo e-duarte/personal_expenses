@@ -66,6 +66,7 @@ class _TransactionFormState extends State<TransactionForm> {
             ),
             TextField(
               controller: _titleController,
+              textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 labelText: 'Título',
               ),
@@ -96,6 +97,7 @@ class _TransactionFormState extends State<TransactionForm> {
             if (_payment == Payment.pix || _payment == Payment.pixCredit)
               TextField(
                 controller: _pixDestController,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Enviado para',
                 ),
@@ -136,6 +138,7 @@ class _TransactionFormState extends State<TransactionForm> {
             if (_owner == Owner.other)
               TextField(
                 controller: _otherController,
+                textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Outro',
                 ),
