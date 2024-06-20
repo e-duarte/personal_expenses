@@ -108,8 +108,9 @@ class Transaction {
 
   String toWhatsapp() {
     final formatedDate = DateFormat('dd/MM/yyyy').format(date);
-    final formatedValue =
-        owner == Owner.divided ? formatValue(value / 2) : formatValue(value);
+    final formatedValue = owner == Owner.divided
+        ? formatValue(value / 2)
+        : formatValue(value / installments);
     return '$title ($formatedDate) \t\t R\$$formatedValue';
   }
 

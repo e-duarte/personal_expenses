@@ -40,7 +40,7 @@ class _HomeState extends State<Home> {
   };
 
   List<Transaction> get _getTransactionByMonth {
-    return _transactions!.where((tr) {
+    final filtred = _transactions!.where((tr) {
       return (tr.date.isBefore(_selectedMonth!) ||
               tr.date.month == _selectedMonth!.month ||
               tr.fixed) &&
@@ -51,6 +51,11 @@ class _HomeState extends State<Home> {
 
       return ((trMonth + tr.installments) > currentMonth) || tr.fixed;
     }).toList();
+
+    filtred.sort(
+      (a, b) => a.date.compareTo(b.date),
+    );
+    return filtred.reversed.toList();
   }
 
   List<Transaction> get _getFiltredTransaction {
@@ -102,8 +107,11 @@ class _HomeState extends State<Home> {
   }
 
   double get _sumFiltredTransactions {
-    return _getFiltredTransaction.fold(0.0, (t1, t2) {
-      return t1 + (t2.owner == Owner.divided ? t2.value / 2 : t2.value);
+    return _getFiltredTransaction.fold(0.0, (sum, tr) {
+      return sum +
+          (tr.owner == Owner.divided
+              ? tr.value / 2
+              : tr.value / tr.installments);
     });
   }
 
