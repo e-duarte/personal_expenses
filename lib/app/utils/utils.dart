@@ -1,8 +1,10 @@
 import 'package:intl/intl.dart';
 
 String formatValue(double value) {
-  final strValue = value.toStringAsFixed(1);
-  return strValue.replaceFirst('.0', '');
+  final strValue = value.toStringAsFixed(2);
+  return strValue;
+  // print(strValue);
+  // return strValue.replaceFirst('.0|.00', '');
 }
 
 String formatMonthToBr(DateTime date) {

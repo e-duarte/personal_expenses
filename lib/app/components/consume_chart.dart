@@ -29,7 +29,7 @@ class ConsumeChart extends StatelessWidget {
             centerText: '${formatValue(100 * consumePercent)}%',
             gap: consumePercent > 0 ? 0.05 : 0.0,
             centerStyle: TextStyle(
-              fontSize: 45,
+              fontSize: 36,
               color: consumePercent == 0.0
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.secondary,
@@ -68,5 +68,5 @@ class ConsumeChart extends StatelessWidget {
 
   double get _otherValues => transactions
       .where((tr) => tr.owner == Owner.other)
-      .fold(0, (sum, tr) => sum + tr.value);
+      .fold(0, (sum, tr) => sum + tr.value / tr.installments);
 }

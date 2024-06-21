@@ -57,7 +57,7 @@ class TransactionDialog extends StatelessWidget {
               maxLines: 3,
             ),
             Text(
-              '${transaction.date.day} do ${transaction.date.month} de ${transaction.date.year}',
+              '${transaction.date.day} de ${formatMonthToBr(transaction.date)} de ${transaction.date.year}',
               style: Theme.of(context).textTheme.titleSmall,
             ),
             transaction.installments > 1

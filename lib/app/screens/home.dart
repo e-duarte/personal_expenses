@@ -107,7 +107,9 @@ class _HomeState extends State<Home> {
   }
 
   double get _sumFiltredTransactions {
-    return _getFiltredTransaction.fold(0.0, (sum, tr) {
+    return _getFiltredTransaction
+        .where((tr) => tr.owner == Owner.me || tr.owner == Owner.divided)
+        .fold(0.0, (sum, tr) {
       return sum +
           (tr.owner == Owner.divided
               ? tr.value / 2
