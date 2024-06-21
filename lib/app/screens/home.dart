@@ -268,7 +268,7 @@ class _HomeState extends State<Home> {
           ),
           Container(
             height: availableHeight * 0.6,
-            padding: const EdgeInsets.all(15),
+            padding: const EdgeInsets.only(left: 15, top: 15, right: 15),
             width: double.infinity,
             decoration: const BoxDecoration(
               color: Colors.white,
@@ -277,7 +277,6 @@ class _HomeState extends State<Home> {
             child: Column(
               children: [
                 Row(
-                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
@@ -310,6 +309,10 @@ class _HomeState extends State<Home> {
                     onRemoveTransaction: _removeTransaction,
                   ),
                 ),
+                Text(
+                  '${_getTransactionByMonth.length} transações no mês',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ),
@@ -329,6 +332,7 @@ class _HomeState extends State<Home> {
   void _openTransactionalModal() {
     showModalBottomSheet(
       context: context,
+      backgroundColor: Colors.white,
       builder: (_) {
         return TransactionForm(
           onSubmit: _addNewTransaction,
