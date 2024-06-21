@@ -28,6 +28,9 @@ class _HomeState extends State<Home> {
   Map<String, bool> _filter = {
     'Dividido': false,
     'Fixado': false,
+    'Pix': false,
+    'PixCredit': false,
+    'Credit': false,
     'Ninos': false,
     'Compras': false,
     'Mercado': false,
@@ -63,6 +66,9 @@ class _HomeState extends State<Home> {
 
     if (_filter['Dividido'] == false &&
         _filter['Fixado'] == false &&
+        _filter['Pix'] == false &&
+        _filter['PixCredit'] == false &&
+        _filter['Credit'] == false &&
         _filter['Ninos'] == false &&
         _filter['Compras'] == false &&
         _filter['Mercado'] == false &&
@@ -84,6 +90,23 @@ class _HomeState extends State<Home> {
 
       if (_filter['Fixado']!) {
         if (tr.fixed) {
+          if (!filtred.contains(tr)) filtred.add(tr);
+        }
+      }
+
+      if (_filter['Pix']!) {
+        if (tr.payment == Payment.pix) {
+          if (!filtred.contains(tr)) filtred.add(tr);
+        }
+      }
+
+      if (_filter['PixCredit']!) {
+        if (tr.payment == Payment.pixCredit) {
+          if (!filtred.contains(tr)) filtred.add(tr);
+        }
+      }
+      if (_filter['Credit']!) {
+        if (tr.payment == Payment.credit) {
           if (!filtred.contains(tr)) filtred.add(tr);
         }
       }
