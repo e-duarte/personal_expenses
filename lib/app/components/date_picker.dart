@@ -43,7 +43,7 @@ class DatePicker extends StatelessWidget {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2021),
-      lastDate: DateTime.now(),
+      lastDate: DateTime(DateTime.now().year + 1),
     ).then((pickedDate) => onDateChanged(pickedDate!));
   }
 }
