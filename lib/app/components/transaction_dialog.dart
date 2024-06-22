@@ -26,6 +26,7 @@ class TransactionDialog extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
               children: [
@@ -53,17 +54,23 @@ class TransactionDialog extends StatelessWidget {
             ),
             Text(
               'R\$${formatValue(transaction.owner == Owner.divided ? transaction.value / 2 : transaction.value)}',
-              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
               maxLines: 3,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             Text(
               '${transaction.date.day} de ${formatMonthToBr(transaction.date)} de ${transaction.date.year}',
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleSmall,
             ),
             transaction.installments > 1
-                ? Text('${transaction.installments}')
+                ? Text(
+                    '${transaction.installments}',
+                    textAlign: TextAlign.center,
+                  )
                 : Text(
                     '1 parcela de R\$${formatValue(transaction.value)}',
+                    textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.labelSmall,
                   ),
             Row(
@@ -77,7 +84,10 @@ class TransactionDialog extends StatelessWidget {
                         width: 18,
                         height: 18,
                       ),
-                      const Text('Fixado - '),
+                      const Text(
+                        'Fixado - ',
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 transaction.owner == Owner.divided
@@ -89,17 +99,24 @@ class TransactionDialog extends StatelessWidget {
                             height: 20,
                           ),
                           const SizedBox(width: 5),
-                          const Text('dividido - '),
+                          const Text(
+                            'dividido - ',
+                            textAlign: TextAlign.center,
+                          ),
                         ],
                       )
                     : Text('${transaction.owner.name} - '),
-                Text(transaction.payment.name)
+                Text(
+                  transaction.payment.name,
+                  textAlign: TextAlign.center,
+                )
               ],
             ),
             if (transaction.pixDest.isNotEmpty)
               Text(
                 'Enviado para ${transaction.pixDest}',
                 maxLines: 3,
+                textAlign: TextAlign.center,
               ),
           ],
         ),
