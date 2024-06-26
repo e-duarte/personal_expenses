@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class TransactionFilterMenu extends StatelessWidget {
-  const TransactionFilterMenu({
+class FilterPopMenu extends StatelessWidget {
+  const FilterPopMenu({
     super.key,
     required this.data,
     required this.onFilterChanged,
@@ -17,14 +17,12 @@ class TransactionFilterMenu extends StatelessWidget {
       MediaQuery.of(context).size.height * 0.3,
     );
 
-    return PopupMenuButton<MapEntry>(
+    return PopupMenuButton<MapEntry<String, bool>>(
       constraints: BoxConstraints.tight(filterSize),
       color: Colors.white,
       surfaceTintColor: Colors.white,
       onSelected: (entry) {
-        final Map<String, bool> newData = Map.from(data);
-        newData[entry.key] = !entry.value;
-        onFilterChanged(newData);
+        onFilterChanged({entry.key: !(entry.value)});
       },
       itemBuilder: (context) {
         return data.entries.map((item) {

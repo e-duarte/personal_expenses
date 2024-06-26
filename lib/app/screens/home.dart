@@ -4,7 +4,7 @@ import 'package:personal_expenses/app/components/consume_chart.dart';
 import 'package:personal_expenses/app/components/months_dropdown.dart';
 import 'package:personal_expenses/app/components/setting_form.dart';
 import 'package:personal_expenses/app/components/tags_chart.dart';
-import 'package:personal_expenses/app/components/transaction_filter_menu.dart';
+import 'package:personal_expenses/app/components/filter_pop_menu.dart';
 import 'package:personal_expenses/app/components/transaction_form.dart';
 import 'package:personal_expenses/app/components/transaction_list.dart';
 import 'package:personal_expenses/app/models/settings.dart';
@@ -13,8 +13,16 @@ import 'package:personal_expenses/app/models/transaction.dart';
 import 'package:personal_expenses/app/services/settings_service.dart';
 import 'package:personal_expenses/app/services/tag_service.dart';
 import 'package:personal_expenses/app/services/transaction_service.dart';
+import 'package:personal_expenses/app/utils/transactions_filter.dart';
 import 'package:personal_expenses/app/utils/utils.dart';
 import 'package:social_share/social_share.dart';
+
+class Home extends StatefulWidget {
+  const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
 
 class _HomeState extends State<Home> {
   DateTime? _selectedMonth;
@@ -25,24 +33,26 @@ class _HomeState extends State<Home> {
 
   List<Transaction>? _transactions;
 
-  Map<String, bool> _filter = {
-    'Dividido': false,
-    'Fixado': false,
-    'Pix': false,
-    'PixCredit': false,
-    'Credit': false,
-    'Ninos': false,
-    'Compras': false,
-    'Mercado': false,
-    'Merenda': false,
-    'Refeição': false,
-    'Despesas': false,
-    'Reserva': false,
-    'Geral': false,
-    'Terceiros': false,
-  };
+  final List<Filter> _filters = [
+    OwnerFilter('Dividido', Owner.divided),
+    FixedFilter('Fixado', true),
+    PaymentFilter('Pix', Payment.pix),
+    PaymentFilter('PixCredit', Payment.pixCredit),
+    PaymentFilter('Credit', Payment.credit),
+    TagFilter('Ninos', 'Ninos'),
+    TagFilter('Compras', 'Compras'),
+    TagFilter('Mercado', 'Mercado'),
+    TagFilter('Merenda', 'Merenda'),
+    TagFilter('Refeição', 'Refeição'),
+    TagFilter('Despesas', 'Despesas'),
+    TagFilter('Reserva', 'Reserva'),
+    TagFilter('Geral', 'Geral'),
+    TagFilter('Terceiros', 'Terceiros'),
+  ];
 
-  List<Transaction> get _getTransactionByMonth {
+  final List<Filter> _activedFilters = [];
+
+  List<Transaction> get _transactionByMonth {
     final filtred = _transactions!.where((tr) {
       return (tr.date.isBefore(_selectedMonth!) ||
               tr.date.month == _selectedMonth!.month ||
@@ -61,76 +71,18 @@ class _HomeState extends State<Home> {
     return filtred.reversed.toList();
   }
 
-  List<Transaction> get _getFiltredTransaction {
-    List<Transaction> filtred = [];
+  List<Transaction> get _filtredTransactions {
+    List<Transaction> filtered = [];
 
-    if (_filter['Dividido'] == false &&
-        _filter['Fixado'] == false &&
-        _filter['Pix'] == false &&
-        _filter['PixCredit'] == false &&
-        _filter['Credit'] == false &&
-        _filter['Ninos'] == false &&
-        _filter['Compras'] == false &&
-        _filter['Mercado'] == false &&
-        _filter['Merenda'] == false &&
-        _filter['Refeição'] == false &&
-        _filter['Despesas'] == false &&
-        _filter['Reserva'] == false &&
-        _filter['Geral'] == false &&
-        _filter['Terceiros'] == false) {
-      return _getTransactionByMonth;
+    for (var filter in _activedFilters) {
+      filtered.addAll(filter.filter(_transactionByMonth));
     }
 
-    for (var tr in _getTransactionByMonth) {
-      if (_filter['Dividido']!) {
-        if (tr.owner == Owner.divided) {
-          if (!filtred.contains(tr)) filtred.add(tr);
-        }
-      }
-
-      if (_filter['Fixado']!) {
-        if (tr.fixed) {
-          if (!filtred.contains(tr)) filtred.add(tr);
-        }
-      }
-
-      if (_filter['Pix']!) {
-        if (tr.payment == Payment.pix) {
-          if (!filtred.contains(tr)) filtred.add(tr);
-        }
-      }
-
-      if (_filter['PixCredit']!) {
-        if (tr.payment == Payment.pixCredit) {
-          if (!filtred.contains(tr)) filtred.add(tr);
-        }
-      }
-      if (_filter['Credit']!) {
-        if (tr.payment == Payment.credit) {
-          if (!filtred.contains(tr)) filtred.add(tr);
-        }
-      }
-
-      for (var tag in [
-        'Ninos',
-        'Compras',
-        'Mercado',
-        'Merenda',
-        'Refeição',
-        'Despesas',
-        'Reserva',
-        'Geral',
-        'Terceiros',
-      ]) {
-        _filtreTransactionByTag(filtred, tr, tag);
-      }
-    }
-
-    return filtred;
+    return filtered.isEmpty ? _transactionByMonth : filtered;
   }
 
   double get _sumFiltredTransactions {
-    return _getFiltredTransaction
+    return _filtredTransactions
         .where((tr) => tr.owner == Owner.me || tr.owner == Owner.divided)
         .fold(0.0, (sum, tr) {
       return sum +
@@ -138,15 +90,6 @@ class _HomeState extends State<Home> {
               ? tr.value / 2
               : tr.value / tr.installments);
     });
-  }
-
-  void _filtreTransactionByTag(
-      List<Transaction> filtreds, Transaction tr, String tag) {
-    if (_filter[tag]!) {
-      if (tr.tag.tag == tag) {
-        if (!filtreds.contains(tr)) filtreds.add(tr);
-      }
-    }
   }
 
   @override
@@ -253,11 +196,11 @@ class _HomeState extends State<Home> {
                     child: _selectedOption == 'Geral'
                         ? ConsumeChart(
                             value: _settings!.monthValue,
-                            transactions: _getTransactionByMonth,
+                            transactions: _transactionByMonth,
                           )
                         : Center(
                             child: TagsChart(
-                              transactions: _getTransactionByMonth,
+                              transactions: _transactionByMonth,
                               tags: _tags,
                             ),
                           ),
@@ -292,25 +235,22 @@ class _HomeState extends State<Home> {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                    TransactionFilterMenu(
-                      data: _filter,
-                      onFilterChanged: (filter) {
-                        setState(() {
-                          _filter = filter;
-                        });
-                      },
+                    FilterPopMenu(
+                      data: FiltersMapper(_filters)
+                          .mapFiltersActive(_activedFilters),
+                      onFilterChanged: _filterTransactions,
                     ),
                   ],
                 ),
                 Expanded(
                   child: TransactionList(
                     currentDate: _selectedMonth!,
-                    transactions: _getFiltredTransaction,
+                    transactions: _filtredTransactions,
                     onRemoveTransaction: _removeTransaction,
                   ),
                 ),
                 Text(
-                  '${_getTransactionByMonth.length} transações no mês',
+                  '${_transactionByMonth.length} transações no mês',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
@@ -356,7 +296,7 @@ class _HomeState extends State<Home> {
   }
 
   void _shareTransaction() {
-    String sharedText = _getFiltredTransaction.fold('', (text, tr) {
+    String sharedText = _filtredTransactions.fold('', (text, tr) {
       return '$text ${tr.toWhatsapp()}\n\n';
     });
     SocialShare.shareWhatsapp(sharedText);
@@ -385,11 +325,22 @@ class _HomeState extends State<Home> {
       _transactions!.removeWhere((tr) => tr.id == transaction.id);
     });
   }
-}
 
-class Home extends StatefulWidget {
-  const Home({super.key});
-
-  @override
-  State<Home> createState() => _HomeState();
+  void _filterTransactions(Map<String, bool> filterMap) {
+    final filterName = filterMap.entries.first.key;
+    final isActive = filterMap.entries.first.value;
+    setState(() {
+      if (isActive) {
+        _activedFilters.add(
+          _filters.firstWhere(
+            (filter) => filter.name == filterName,
+          ),
+        );
+      } else {
+        _activedFilters.removeWhere(
+          (filter) => filter.name == filterName,
+        );
+      }
+    });
+  }
 }
