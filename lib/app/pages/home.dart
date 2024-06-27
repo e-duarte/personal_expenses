@@ -1,5 +1,5 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:personal_expenses/app/components/chart_selector.dart';
 import 'package:personal_expenses/app/components/consume_chart.dart';
 import 'package:personal_expenses/app/components/months_dropdown.dart';
 import 'package:personal_expenses/app/components/setting_form.dart';
@@ -26,7 +26,6 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   DateTime? _selectedMonth;
-  String _selectedOption = 'Geral';
   Settings? _settings;
 
   List<Tag> _tags = [];
@@ -169,53 +168,51 @@ class _HomeState extends State<Home> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            height: availableHeight * 0.04,
-            child: ChartSelector(
-              initialOption: _selectedOption,
-              optionHandle: (String option) {
-                setState(() {
-                  _selectedOption = option;
-                });
-              },
-            ),
-          ),
-          SizedBox(
             height: availableHeight * 0.36,
-            width: double.infinity,
+            width: mediaQuery.size.width,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                return Center(
-                  child: Container(
-                    height: constraints.maxHeight * 0.94,
-                    width: constraints.maxWidth * 0.94,
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: _selectedOption == 'Geral'
-                        ? ConsumeChart(
-                            value: _settings!.monthValue,
-                            transactions: _transactionByMonth,
-                          )
-                        : Center(
-                            child: TagsChart(
-                              transactions: _transactionByMonth,
-                              tags: _tags,
-                            ),
-                          ),
+                final charts = [
+                  ConsumeChart(
+                    value: _settings!.monthValue,
+                    transactions: _transactionByMonth,
                   ),
+                  Center(
+                    child: TagsChart(
+                      transactions: _transactionByMonth,
+                      tags: _tags,
+                    ),
+                  ),
+                ];
+                return CarouselSlider(
+                  options: CarouselOptions(
+                    height: constraints.maxHeight * 0.94,
+                    enableInfiniteScroll: false,
+                    viewportFraction: 0.95,
+                    enlargeCenterPage: true,
+                  ),
+                  items: charts.map((chart) {
+                    return Container(
+                      width: constraints.maxWidth,
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: chart,
+                    );
+                  }).toList(),
                 );
               },
             ),
           ),
           Container(
-            height: availableHeight * 0.6,
-            padding: const EdgeInsets.only(left: 15, top: 15, right: 15),
+            height: availableHeight * 0.64,
+            padding: const EdgeInsets.only(left: 10, top: 10, right: 10),
             width: double.infinity,
             decoration: const BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
             ),
             child: Column(
               children: [

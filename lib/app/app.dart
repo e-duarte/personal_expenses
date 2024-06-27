@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:personal_expenses/app/screens/home.dart';
+import 'package:personal_expenses/app/pages/home.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 class App extends StatelessWidget {
@@ -55,7 +55,7 @@ class App extends StatelessWidget {
           ),
         ),
         appBarTheme: theme.appBarTheme.copyWith(
-          backgroundColor: const Color(0xFFE9E9E9),
+          backgroundColor: Colors.white,
         ),
         scaffoldBackgroundColor: const Color(0xFFE9E9E9),
       ),
