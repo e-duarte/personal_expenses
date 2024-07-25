@@ -19,6 +19,7 @@ import 'package:personal_expenses/app/services/tag_service.dart';
 import 'package:personal_expenses/app/services/transaction_service.dart';
 import 'package:personal_expenses/app/utils/transactions_filter.dart';
 import 'package:personal_expenses/app/utils/utils.dart';
+import 'package:social_share/social_share.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -151,8 +152,12 @@ class _HomeState extends State<Home> {
             color: Theme.of(context).colorScheme.primary,
           ),
           IconButton(
-            onPressed: _shareTransactions,
+            onPressed: _shareWhatsapp,
             icon: const Icon(Icons.share),
+          ),
+          IconButton(
+            onPressed: _shareTransactions,
+            icon: const Icon(Icons.download_rounded),
           ),
           IconButton(
             onPressed: _openSettingsModal,
@@ -287,7 +292,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _shareTransactions() async {
+  String _toCsvFormat() {
     final List<List<String>> transactionRows = [];
     final header = [
       'Categoria',
@@ -304,9 +309,17 @@ class _HomeState extends State<Home> {
       transactionRows.add(tr.toCsvRow());
     }
 
-    final csv = const ListToCsvConverter().convert(transactionRows);
+    return const ListToCsvConverter().convert(transactionRows);
+  }
 
-    // final Directory? appDocumentsDir = await getDownloadsDirectory();
+  void _shareWhatsapp() async {
+    final csv = _toCsvFormat();
+    SocialShare.shareWhatsapp(csv);
+  }
+
+  void _shareTransactions() async {
+    final csv = _toCsvFormat();
+
     final Directory downloadsDir = Directory('/storage/emulated/0/Download/');
 
     final file = File(
@@ -319,8 +332,6 @@ class _HomeState extends State<Home> {
         content: Text('Arquivo foi salvo em Downloads'),
       ),
     );
-
-    // SocialShare.shareWhatsapp(csv);
   }
 
   void _updateSettings(Settings settings) async {
