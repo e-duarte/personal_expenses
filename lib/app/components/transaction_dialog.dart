@@ -99,15 +99,15 @@ class TransactionDialog extends StatelessWidget {
                             height: 20,
                           ),
                           const SizedBox(width: 5),
-                          const Text(
-                            'dividido - ',
+                          Text(
+                            '${transaction.ownerText} - ',
                             textAlign: TextAlign.center,
                           ),
                         ],
                       )
-                    : Text('${transaction.owner.name} - '),
+                    : Text('${transaction.ownerText} - '),
                 Text(
-                  transaction.payment.name,
+                  transaction.paymentText,
                   textAlign: TextAlign.center,
                 )
               ],

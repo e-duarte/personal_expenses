@@ -17,6 +17,28 @@ class TransactionListItem extends StatelessWidget {
   final DateTime currentDate;
   final void Function(Transaction) onRemove;
 
+  double get currentTransactionValue {
+    final value = transaction.value / transaction.installments;
+    return transaction.owner == Owner.divided ? value / 2 : value;
+  }
+
+  String get ownerDescription {
+    return switch (transaction.owner) {
+      Owner.me => 'Eu',
+      Owner.other => transaction.ownerDesc,
+      Owner.divided => '',
+    };
+  }
+
+  String get _installmentLegend {
+    if (transaction.installments == 1) return '';
+
+    final currentInstallment =
+        (currentDate.month - transaction.date.month + 1).abs();
+
+    return '$currentInstallment/${transaction.installments}';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -55,11 +77,16 @@ class TransactionListItem extends StatelessWidget {
                     height: 20,
                   ),
                 Text(
-                  '${transaction.owner == Owner.other ? transaction.ownerDesc : transaction.owner == Owner.me ? transaction.owner.name : ''} - ${_getCurrentInstallment(transaction)}/${transaction.installments}',
+                  transaction.owner != Owner.divided
+                      ? transaction.ownerText
+                      : '',
                 ),
+                const SizedBox(width: 8),
+                Text(transaction.paymentText),
+                const SizedBox(width: 8),
+                Text(_installmentLegend),
               ],
             ),
-            Text(transaction.payment.name),
           ],
         ),
         trailing: Column(
@@ -67,7 +94,7 @@ class TransactionListItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Text(
-              'R\$${transaction.owner == Owner.divided ? formatValue(transaction.value / 2) : formatValue(transaction.value / transaction.installments)}',
+              'R\$${formatValue(currentTransactionValue)}',
               textAlign: TextAlign.start,
               style: Theme.of(context).textTheme.labelMedium,
             ),
@@ -93,9 +120,5 @@ class TransactionListItem extends StatelessWidget {
         );
       },
     );
-  }
-
-  int _getCurrentInstallment(Transaction transaction) {
-    return (currentDate.month - transaction.date.month + 1).abs();
   }
 }

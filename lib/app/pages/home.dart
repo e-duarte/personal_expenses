@@ -1,6 +1,10 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:personal_expenses/app/components/consume_chart.dart';
+import 'package:personal_expenses/app/components/loading_widget.dart';
 import 'package:personal_expenses/app/components/months_dropdown.dart';
 import 'package:personal_expenses/app/components/setting_form.dart';
 import 'package:personal_expenses/app/components/tags_chart.dart';
@@ -15,7 +19,6 @@ import 'package:personal_expenses/app/services/tag_service.dart';
 import 'package:personal_expenses/app/services/transaction_service.dart';
 import 'package:personal_expenses/app/utils/transactions_filter.dart';
 import 'package:personal_expenses/app/utils/utils.dart';
-import 'package:social_share/social_share.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -118,15 +121,15 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return _settings == null
-        ? _loadingScreen()
+        ? const LoadingWidget()
         : _tags.isNotEmpty
             ? _transactions != null
-                ? _buildHome()
-                : _loadingScreen()
-            : _loadingScreen();
+                ? _buildHome(context)
+                : const LoadingWidget()
+            : const LoadingWidget();
   }
 
-  Widget _buildHome() {
+  Widget _buildHome(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
 
     final appBarHeight = mediaQuery.size.height * 0.05;
@@ -148,7 +151,7 @@ class _HomeState extends State<Home> {
             color: Theme.of(context).colorScheme.primary,
           ),
           IconButton(
-            onPressed: _shareTransaction,
+            onPressed: _shareTransactions,
             icon: const Icon(Icons.share),
           ),
           IconButton(
@@ -258,14 +261,6 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _loadingScreen() {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-  }
-
   void _openTransactionalModal() {
     showModalBottomSheet(
       context: context,
@@ -292,11 +287,40 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _shareTransaction() {
-    String sharedText = _filtredTransactions.fold('', (text, tr) {
-      return '$text ${tr.toWhatsapp()}\n\n';
-    });
-    SocialShare.shareWhatsapp(sharedText);
+  void _shareTransactions() async {
+    final List<List<String>> transactionRows = [];
+    final header = [
+      'Categoria',
+      'Título',
+      'Autor',
+      'Parcelas',
+      'Data',
+      'Valor',
+    ];
+
+    transactionRows.add(header);
+
+    for (var tr in _filtredTransactions) {
+      transactionRows.add(tr.toCsvRow());
+    }
+
+    final csv = const ListToCsvConverter().convert(transactionRows);
+
+    // final Directory? appDocumentsDir = await getDownloadsDirectory();
+    final Directory downloadsDir = Directory('/storage/emulated/0/Download/');
+
+    final file = File(
+      '${downloadsDir.path}/despesas_${formatMonthToBr(_selectedMonth!)}.csv',
+    );
+
+    await file.writeAsString(csv);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Arquivo foi salvo em Downloads'),
+      ),
+    );
+
+    // SocialShare.shareWhatsapp(csv);
   }
 
   void _updateSettings(Settings settings) async {

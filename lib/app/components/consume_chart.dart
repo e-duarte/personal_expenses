@@ -13,7 +13,6 @@ class ConsumeChart extends StatelessWidget {
 
   final double value;
   final List<Transaction> transactions;
-  // final double otherValues;
 
   @override
   Widget build(BuildContext context) {
@@ -58,13 +57,15 @@ class ConsumeChart extends StatelessWidget {
     );
   }
 
-  double get _totalSum => transactions
-          .where((tr) => tr.owner == Owner.me || tr.owner == Owner.divided)
-          .fold(0.0, (sum, tr) {
-        return tr.owner == Owner.divided
-            ? (sum + tr.value / 2)
-            : sum + (tr.value / tr.installments);
-      });
+  double get _totalSum {
+    return transactions
+        .where((tr) => tr.owner == Owner.me || tr.owner == Owner.divided)
+        .fold(0.0, (sum, tr) {
+      return tr.owner == Owner.divided
+          ? (sum + ((tr.value / tr.installments) / 2))
+          : sum + (tr.value / tr.installments);
+    });
+  }
 
   double get _otherValues => transactions
       .where((tr) => tr.owner == Owner.other)

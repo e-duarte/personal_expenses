@@ -62,6 +62,22 @@ class Transaction {
     );
   }
 
+  String get ownerText {
+    return switch (owner) {
+      Owner.me => 'Eu',
+      Owner.other => ownerDesc,
+      Owner.divided => 'Dividido',
+    };
+  }
+
+  String get paymentText {
+    return switch (payment) {
+      Payment.pix => 'Pix',
+      Payment.pixCredit => 'Pix-Crédito',
+      Payment.credit => 'Crédito',
+    };
+  }
+
   Map<String, Object?> toMap() {
     return {
       'id': id,
@@ -106,12 +122,19 @@ class Transaction {
     );
   }
 
-  String toWhatsapp() {
+  List<String> toCsvRow() {
     final formatedDate = DateFormat('dd/MM/yyyy').format(date);
     final formatedValue = owner == Owner.divided
         ? formatValue(value / 2)
         : formatValue(value / installments);
-    return '$title ($formatedDate) \t\t R\$$formatedValue';
+    return [
+      tag.tag,
+      title,
+      ownerDesc,
+      installments.toString(),
+      formatedDate,
+      formatedValue,
+    ];
   }
 
   @override

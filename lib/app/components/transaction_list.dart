@@ -23,7 +23,7 @@ class TransactionList extends StatelessWidget {
               style: Theme.of(context).textTheme.labelMedium,
             ),
           )
-        : ListView.builder(
+        : ListView.separated(
             itemCount: transactions.length,
             itemBuilder: (context, index) {
               final tr = transactions[index];
@@ -36,6 +36,7 @@ class TransactionList extends StatelessWidget {
                 },
               );
             },
+            separatorBuilder: (context, index) => const Divider(height: 0.01),
           );
   }
 }
