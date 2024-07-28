@@ -26,16 +26,23 @@ class TagsRadioButton extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              GestureDetector(
+              InkWell(
                 onTap: () => onChanged(tags[index]),
                 child: TagLeading(
-                  tags[index].iconPath,
-                  initialTag == tags[index]
+                  tags[index],
+                  color: initialTag.tag == tags[index].tag
                       ? Theme.of(context).colorScheme.primary
-                      : Color(int.parse(tags[index].color)),
+                      : tags[index].color,
                 ),
               ),
-              Text(tags[index].tag),
+              initialTag.tag != tags[index].tag
+                  ? Text(tags[index].tag)
+                  : Text(
+                      tags[index].tag,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ],
           );
         },

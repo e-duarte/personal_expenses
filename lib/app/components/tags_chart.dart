@@ -52,7 +52,7 @@ class TagsChart extends StatelessWidget {
                   ),
                 ),
                 barGroups: List.generate(_groupedValues.length, (index) {
-                  final tagColor = Color(int.parse(tags[index].color));
+                  final tagColor = tags[index].color;
 
                   return BarChartGroupData(
                     x: index,

@@ -1,124 +1,100 @@
 import 'package:flutter/material.dart';
-import 'package:personal_expenses/app/components/tag_leading.dart';
+import 'package:personal_expenses/app/components/transaction_update_form.dart';
 import 'package:personal_expenses/app/models/transaction.dart';
-import 'package:personal_expenses/app/utils/utils.dart';
+import 'package:personal_expenses/app/components/transaction_detail.dart';
 
-class TransactionDialog extends StatelessWidget {
+class TransactionDialog extends StatefulWidget {
   const TransactionDialog({
     super.key,
     required this.transaction,
     required this.onRemoveTransaction,
+    required this.onUpdateTransation,
   });
 
   final Transaction transaction;
   final void Function(Transaction) onRemoveTransaction;
+  final void Function(Transaction) onUpdateTransation;
+
+  @override
+  State<TransactionDialog> createState() => _TransactionDialogState();
+}
+
+class _TransactionDialogState extends State<TransactionDialog> {
+  bool isEdited = false;
+
+  double percentHeight = 0.45;
+
+  void _updateTranscation(Transaction transaction) {
+    widget.onUpdateTransation(transaction);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final totalHeight = MediaQuery.of(context).size.height * percentHeight;
+    final topBarHeigth = totalHeight * 0.15;
+    final availableHeight = totalHeight - topBarHeigth;
+
     return Dialog(
-      insetPadding: const EdgeInsets.all(20),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
       backgroundColor: Colors.transparent,
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height * 0.4,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                const Spacer(),
-                IconButton(
-                  onPressed: () => onRemoveTransaction(transaction),
-                  icon: const Icon(
-                    Icons.delete_outline_outlined,
-                  ),
-                ),
-              ],
-            ),
-            TagLeading(
-              transaction.tag.iconPath,
-              Color(int.parse(transaction.tag.color)),
-            ),
-            Text(
-              transaction.title,
-              style: Theme.of(context).textTheme.titleLarge,
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              'R\$${formatValue(transaction.owner == Owner.divided ? transaction.value / 2 : transaction.value)}',
-              textAlign: TextAlign.center,
-              maxLines: 3,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text(
-              '${transaction.date.day} de ${formatMonthToBr(transaction.date)} de ${transaction.date.year}',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            transaction.installments > 1
-                ? Text(
-                    '${transaction.installments}',
-                    textAlign: TextAlign.center,
-                  )
-                : Text(
-                    '1 parcela de R\$${formatValue(transaction.value)}',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelSmall,
-                  ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (transaction.fixed)
-                  Row(
-                    children: [
-                      Image.asset(
-                        'assets/icons/pin_icon.png',
-                        width: 18,
-                        height: 18,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: totalHeight,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: topBarHeigth,
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.arrow_back),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          isEdited = !isEdited;
+                          percentHeight = isEdited ? 0.8 : 0.45;
+                        });
+                      },
+                      icon: Icon(
+                        isEdited ? Icons.dataset_outlined : Icons.edit_outlined,
                       ),
-                      const Text(
-                        'Fixado - ',
-                        textAlign: TextAlign.center,
+                    ),
+                    IconButton(
+                      onPressed: () =>
+                          widget.onRemoveTransaction(widget.transaction),
+                      icon: const Icon(
+                        Icons.delete_outline_outlined,
                       ),
-                    ],
-                  ),
-                transaction.owner == Owner.divided
-                    ? Row(
-                        children: [
-                          Image.asset(
-                            'assets/icons/divided_icon.png',
-                            width: 20,
-                            height: 20,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            '${transaction.ownerText} - ',
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      )
-                    : Text('${transaction.ownerText} - '),
-                Text(
-                  transaction.paymentText,
-                  textAlign: TextAlign.center,
-                )
-              ],
-            ),
-            if (transaction.pixDest.isNotEmpty)
-              Text(
-                'Enviado para ${transaction.pixDest}',
-                maxLines: 3,
-                textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
               ),
-          ],
+              Container(
+                padding: const EdgeInsets.only(
+                  bottom: 20,
+                  left: 20,
+                  right: 20,
+                ),
+                height: availableHeight,
+                child: isEdited
+                    ? TransactionUpdateForm(
+                        widget.transaction,
+                        _updateTranscation,
+                      )
+                    : TransactionDetail(transaction: widget.transaction),
+              )
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:personal_expenses/app/pages/home.dart';
+import 'package:personal_expenses/app/screens/home_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:personal_expenses/app/screens/transaction_form_screen.dart';
+import 'package:personal_expenses/app/utils/app_routes.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -59,7 +61,13 @@ class App extends StatelessWidget {
         ),
         scaffoldBackgroundColor: const Color(0xFFE9E9E9),
       ),
-      home: const Home(),
+      // home: const HomeScreen(),
+      initialRoute: AppRoutes.HOME_SCREEN,
+      routes: {
+        AppRoutes.HOME_SCREEN: (ctx) => const HomeScreen(),
+        AppRoutes.TRANSACTION_FORM_SCREEN: (ctx) =>
+            const TransactionFormScreen(),
+      },
     );
   }
 }

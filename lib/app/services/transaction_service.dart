@@ -26,4 +26,8 @@ class TransactionService {
   Future<void> removeTransaction(Transaction transaction) async {
     await DbUtils.deleteData(_table, transaction.toMap());
   }
+
+  Future<void> updateTransaction(Transaction transaction) async {
+    await DbUtils.updateData(_table, transaction.toMap());
+  }
 }

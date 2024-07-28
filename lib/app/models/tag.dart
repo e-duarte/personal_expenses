@@ -1,8 +1,10 @@
+import 'package:flutter/material.dart';
+
 class Tag {
   final int? id;
   final String tag;
   final String iconPath;
-  final String color;
+  final Color color;
 
   Tag({
     this.id,
@@ -16,7 +18,9 @@ class Tag {
       id: data['id'] as int,
       tag: data['tag'] as String,
       iconPath: data['iconPath'] as String,
-      color: data['color'] as String,
+      color: Color(
+        int.parse(data['color'] as String),
+      ),
     );
   }
 
@@ -25,7 +29,7 @@ class Tag {
       'id': id,
       'tag': tag,
       'iconPath': iconPath,
-      'color': color,
+      'color': color.value.toString(),
     };
   }
 
@@ -33,7 +37,7 @@ class Tag {
     int? id,
     String? tag,
     String? iconPath,
-    String? color,
+    Color? color,
   }) {
     return Tag(
       id: id ?? this.id,

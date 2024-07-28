@@ -17,9 +17,12 @@ class LabelSwtich extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.titleSmall,
+        SizedBox(
+          width: 220,
+          child: Text(
+            label,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
         ),
         Transform.scale(
           scale: 0.9,

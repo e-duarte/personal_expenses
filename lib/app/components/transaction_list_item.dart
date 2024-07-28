@@ -11,11 +11,13 @@ class TransactionListItem extends StatelessWidget {
     required this.transaction,
     required this.currentDate,
     required this.onRemove,
+    required this.onUpdate,
   });
 
   final Transaction transaction;
   final DateTime currentDate;
   final void Function(Transaction) onRemove;
+  final void Function(Transaction) onUpdate;
 
   double get currentTransactionValue {
     final value = transaction.value / transaction.installments;
@@ -49,10 +51,7 @@ class TransactionListItem extends StatelessWidget {
         horizontalTitleGap: 7,
         minVerticalPadding: 0,
         onTap: () => _openTransactionDialog(context),
-        leading: TagLeading(
-          transaction.tag.iconPath,
-          Color(int.parse(transaction.tag.color)),
-        ),
+        leading: TagLeading(transaction.tag),
         title: Text(
           transaction.title,
           style: Theme.of(context).textTheme.labelLarge,
@@ -117,6 +116,7 @@ class TransactionListItem extends StatelessWidget {
         return TransactionDialog(
           transaction: transaction,
           onRemoveTransaction: onRemove,
+          onUpdateTransation: onUpdate,
         );
       },
     );

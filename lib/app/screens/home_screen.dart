@@ -9,7 +9,7 @@ import 'package:personal_expenses/app/components/months_dropdown.dart';
 import 'package:personal_expenses/app/components/setting_form.dart';
 import 'package:personal_expenses/app/components/tags_chart.dart';
 import 'package:personal_expenses/app/components/filter_pop_menu.dart';
-import 'package:personal_expenses/app/components/transaction_form.dart';
+import 'package:personal_expenses/app/screens/transaction_form_screen.dart';
 import 'package:personal_expenses/app/components/transaction_list.dart';
 import 'package:personal_expenses/app/models/settings.dart';
 import 'package:personal_expenses/app/models/tag.dart';
@@ -17,18 +17,19 @@ import 'package:personal_expenses/app/models/transaction.dart';
 import 'package:personal_expenses/app/services/settings_service.dart';
 import 'package:personal_expenses/app/services/tag_service.dart';
 import 'package:personal_expenses/app/services/transaction_service.dart';
+import 'package:personal_expenses/app/utils/app_routes.dart';
 import 'package:personal_expenses/app/utils/transactions_filter.dart';
 import 'package:personal_expenses/app/utils/utils.dart';
 import 'package:social_share/social_share.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeScreenState extends State<HomeScreen> {
   DateTime? _selectedMonth;
   Settings? _settings;
 
@@ -147,7 +148,7 @@ class _HomeState extends State<Home> {
         ),
         actions: [
           IconButton(
-            onPressed: _openTransactionalModal,
+            onPressed: () => _openTransactionalForm(context),
             icon: const Icon(Icons.add),
             color: Theme.of(context).colorScheme.primary,
           ),
@@ -172,6 +173,7 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       appBar: appBar,
+      resizeToAvoidBottomInset: false,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -252,6 +254,7 @@ class _HomeState extends State<Home> {
                     currentDate: _selectedMonth!,
                     transactions: _filtredTransactions,
                     onRemoveTransaction: _removeTransaction,
+                    onUpdateTransaction: _updateTransaction,
                   ),
                 ),
                 Text(
@@ -266,15 +269,11 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void _openTransactionalModal() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.white,
-      builder: (_) {
-        return TransactionForm(
-          onSubmit: _addNewTransaction,
-        );
-      },
+  void _openTransactionalForm(BuildContext context) {
+    Navigator.pushNamed(
+      context,
+      AppRoutes.TRANSACTION_FORM_SCREEN,
+      arguments: _addNewTransaction,
     );
   }
 
@@ -355,6 +354,14 @@ class _HomeState extends State<Home> {
 
     setState(() {
       _transactions!.removeWhere((tr) => tr.id == transaction.id);
+    });
+  }
+
+  void _updateTransaction(Transaction transaction) async {
+    await TransactionService().updateTransaction(transaction);
+    setState(() {
+      _transactions!.removeWhere((tr) => tr.id == transaction.id);
+      _transactions!.add(transaction);
     });
   }
 

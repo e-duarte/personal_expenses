@@ -8,11 +8,13 @@ class TransactionList extends StatelessWidget {
     required this.transactions,
     required this.currentDate,
     required this.onRemoveTransaction,
+    required this.onUpdateTransaction,
   });
 
   final DateTime currentDate;
   final List<Transaction> transactions;
   final void Function(Transaction) onRemoveTransaction;
+  final void Function(Transaction) onUpdateTransaction;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +34,10 @@ class TransactionList extends StatelessWidget {
                 currentDate: currentDate,
                 onRemove: (transaction) {
                   onRemoveTransaction(transaction);
+                  Navigator.pop(context);
+                },
+                onUpdate: (transaction) {
+                  onUpdateTransaction(transaction);
                   Navigator.pop(context);
                 },
               );
