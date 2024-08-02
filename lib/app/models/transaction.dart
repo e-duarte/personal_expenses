@@ -78,6 +78,14 @@ class Transaction {
     };
   }
 
+  double get installmentValue {
+    return value / installments;
+  }
+
+  bool get isDivided {
+    return owner == Owner.divided;
+  }
+
   Map<String, Object?> toMap() {
     return {
       'id': id,
@@ -125,7 +133,7 @@ class Transaction {
   List<String> toCsvRow() {
     final formatedDate = DateFormat('dd/MM/yyyy').format(date);
     final formatedValue = owner == Owner.divided
-        ? formatValue(value / 2)
+        ? formatValue((value / installments) / 2)
         : formatValue(value / installments);
     return [
       tag.tag,

@@ -13,8 +13,6 @@ class TransactionDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDivided = transaction.owner == Owner.divided;
-    final valueByinstallment = transaction.value / transaction.installments;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -25,26 +23,31 @@ class TransactionDetail extends StatelessWidget {
           textAlign: TextAlign.center,
         ),
         Text(
-          'R\$${formatValue(isDivided ? valueByinstallment / 2 : valueByinstallment)}',
+          'R\$${formatValue(transaction.value)} (total)',
           textAlign: TextAlign.center,
           maxLines: 3,
           style: Theme.of(context).textTheme.titleMedium,
         ),
+        if (transaction.installments == 1 && transaction.isDivided)
+          Text(
+            'R\$${formatValue(transaction.installmentValue / 2)} (dividido)',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelSmall,
+          ),
         Text(
           '${transaction.date.day} de ${formatMonthToBr(transaction.date)} de ${transaction.date.year}',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleSmall,
         ),
-        transaction.installments > 1
-            ? Text(
-                '${transaction.installments} parcelas R\$${formatValue(isDivided ? valueByinstallment / 2 : valueByinstallment)}',
-                textAlign: TextAlign.center,
-              )
-            : Text(
-                '1 parcela de R\$${formatValue(transaction.value)}',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.labelSmall,
-              ),
+        if (transaction.installments > 1)
+          Text(
+            '${transaction.installments} parcelas de R\$${formatValue(transaction.installmentValue)}',
+          ),
+        if (transaction.installments > 1 && transaction.isDivided)
+          Text(
+            '${transaction.installments} parcelas de R\$${formatValue(transaction.installmentValue / 2)} (dividido)',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -62,22 +65,6 @@ class TransactionDetail extends StatelessWidget {
                   ),
                 ],
               ),
-            transaction.owner == Owner.divided
-                ? Row(
-                    children: [
-                      Image.asset(
-                        'assets/icons/divided_icon.png',
-                        width: 20,
-                        height: 20,
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        '${transaction.ownerText} - ',
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  )
-                : Text('${transaction.ownerText} - '),
             Text(
               transaction.paymentText,
               textAlign: TextAlign.center,

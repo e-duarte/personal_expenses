@@ -9,7 +9,6 @@ import 'package:personal_expenses/app/components/months_dropdown.dart';
 import 'package:personal_expenses/app/components/setting_form.dart';
 import 'package:personal_expenses/app/components/tags_chart.dart';
 import 'package:personal_expenses/app/components/filter_pop_menu.dart';
-import 'package:personal_expenses/app/screens/transaction_form_screen.dart';
 import 'package:personal_expenses/app/components/transaction_list.dart';
 import 'package:personal_expenses/app/models/settings.dart';
 import 'package:personal_expenses/app/models/tag.dart';
@@ -21,6 +20,8 @@ import 'package:personal_expenses/app/utils/app_routes.dart';
 import 'package:personal_expenses/app/utils/transactions_filter.dart';
 import 'package:personal_expenses/app/utils/utils.dart';
 import 'package:social_share/social_share.dart';
+// import 'package:open_file/open_file.dart';
+import 'package:open_app_file/open_app_file.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -234,14 +235,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
-                    Text(
-                      'Soma: R\$${formatValue(_sumFiltredTransactions)}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                    if (_activedFilters.isNotEmpty)
+                      Text(
+                        'Soma: R\$${formatValue(_sumFiltredTransactions)}',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
-                    ),
                     FilterPopMenu(
                       data: FiltersMapper(_filters)
                           .mapFiltersActive(_activedFilters),
@@ -320,15 +322,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final csv = _toCsvFormat();
 
     final Directory downloadsDir = Directory('/storage/emulated/0/Download/');
+    final filePath =
+        '${downloadsDir.path}/despesas_${formatMonthToBr(_selectedMonth!)}.csv';
 
-    final file = File(
-      '${downloadsDir.path}/despesas_${formatMonthToBr(_selectedMonth!)}.csv',
-    );
+    final file = File(filePath);
 
     await file.writeAsString(csv);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Arquivo foi salvo em Downloads'),
+      SnackBar(
+        content: const Text('Arquivo foi salvo em Downloads'),
+        action: SnackBarAction(
+            label: 'Abrir',
+            textColor: Theme.of(context).colorScheme.primary,
+            onPressed: () {
+              // OpenFile.open(file.path, type: '.csv');
+              OpenAppFile.open(file.path);
+            }),
       ),
     );
   }
