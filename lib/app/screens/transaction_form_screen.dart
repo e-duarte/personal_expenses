@@ -25,7 +25,7 @@ class _TransactionFormScreenState extends State<TransactionFormScreen> {
   final FocusNode _focusNode2 = FocusNode();
   final FocusNode _focusNode3 = FocusNode();
 
-  final _numberOfInstallments = 10;
+  final _numberOfInstallments = 12;
 
   Payment _payment = Payment.pix;
   bool _fixed = false;
